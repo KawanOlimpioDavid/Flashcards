@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { nextState, type Rating } from "@/lib/srs";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/dal";
 
@@ -40,4 +41,22 @@ export async function deleteCard(formData: FormData) {
   await prisma.card.delete({ where: { id: card.id } });
   revalidatePath(`/decks/${card.deckId}`);
   revalidatePath("/decks");
+}
+
+export async function reviewCard(formData: FormData) {
+  const user = await requireUser();
+  const id = Number(formData.get("id"));
+  const rating = String(formData.get("rating"));
+  if (!Number.isInteger(id) || !["hard", "medium", "easy"].includes(rating)) return;
+
+  // Only cards from decks that belong to the logged-in user
+  const card = await prisma.card.findFirst({
+    where: { id, deck: { userId: user.id } },
+    select: { id: true, box: true, deckId: true },
+  });
+  if (!card) return;
+
+  const { box, nextReview } = nextState(card.box, rating as Rating);
+  await prisma.card.update({ where: { id: card.id }, data: { box, nextReview } });
+  revalidatePath(`/decks/${card.deckId}/study`);
 }

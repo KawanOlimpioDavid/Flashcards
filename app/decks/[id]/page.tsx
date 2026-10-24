@@ -27,7 +27,7 @@ async function DeckContent({ params }: { params: Promise<{ id: string }> }) {
       </Link>
       <h1 className="mb-1 mt-4 text-2xl font-bold">{deck.name}</h1>
       <p className="mb-6 text-sm text-gray-400">{deck.cards.length} {deck.cards.length === 1 ? "card" : "cards"}</p>
-
+      <Link href={`/decks/${deck.id}/study`} className="mb-6 inline-block rounded bg-green-600 px-4 py-2 text-white">Study</Link>
       <form action={createCard} className="mb-8 flex flex-col gap-3">
         <input type="hidden" name="deckId" value={deck.id} />
         <input name="front" placeholder="Front (question)" required maxLength={500} className={inputClass} />
