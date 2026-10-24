@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/dal";
 import { createDeck, deleteDeck } from "@/app/actions/decks";
@@ -45,8 +46,10 @@ async function Decks() {
               className="flex items-center justify-between rounded border border-gray-600 p-3"
             >
               <span>
-                {deck.name}{" "}
-                <span className="text-sm text-gray-400">({deck._count.cards} cards)</span>
+                <Link href={`/decks/${deck.id}`} className="underline">
+                  {deck.name}
+                </Link>{" "}
+                <span className="text-sm text-gray-400">({deck._count.cards} {deck._count.cards === 1 ? "card" : "cards"})</span>
               </span>
               <form action={deleteDeck}>
                 <input type="hidden" name="id" value={deck.id} />
