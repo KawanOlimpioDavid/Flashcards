@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { nextState, type Rating } from "@/lib/srs";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/dal";
-import { redirect } from "next/navigation";
+import { nextState, type Rating } from "@/lib/srs";
+
+type ActionResult = { ok?: boolean; error?: string } | undefined;
 
 export async function createCard(formData: FormData) {
   const user = await requireUser();
@@ -15,7 +17,6 @@ export async function createCard(formData: FormData) {
   if (!Number.isInteger(deckId) || !front || !back) return;
   if (front.length > 500 || back.length > 2000) return;
 
-  // Make sure the deck belongs to the logged-in user
   const deck = await prisma.deck.findFirst({
     where: { id: deckId, userId: user.id },
     select: { id: true },
@@ -27,21 +28,26 @@ export async function createCard(formData: FormData) {
   revalidatePath("/decks");
 }
 
-export async function deleteCard(formData: FormData) {
+export async function deleteCard(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id)) return;
+  if (!Number.isInteger(id)) return { error: "Invalid card." };
 
-  // Only find the card if its deck belongs to the logged-in user
   const card = await prisma.card.findFirst({
     where: { id, deck: { userId: user.id } },
     select: { id: true, deckId: true },
   });
-  if (!card) return;
+  if (!card) return { error: "This card no longer exists. Reload the page." };
 
-  await prisma.card.delete({ where: { id: card.id } });
+  try {
+    await prisma.card.delete({ where: { id: card.id } });
+  } catch {
+    return { error: "Could not delete the card. Please try again." };
+  }
+
   revalidatePath(`/decks/${card.deckId}`);
   revalidatePath("/decks");
+  return { ok: true };
 }
 
 export async function reviewCard(formData: FormData) {
@@ -50,7 +56,6 @@ export async function reviewCard(formData: FormData) {
   const rating = String(formData.get("rating"));
   if (!Number.isInteger(id) || !["hard", "medium", "easy"].includes(rating)) return;
 
-  // Only cards from decks that belong to the logged-in user
   const card = await prisma.card.findFirst({
     where: { id, deck: { userId: user.id } },
     select: { id: true, box: true, deckId: true },
@@ -71,7 +76,6 @@ export async function updateCard(formData: FormData) {
   if (!Number.isInteger(id) || !front || !back) return;
   if (front.length > 500 || back.length > 2000) return;
 
-  // Only cards from decks that belong to the logged-in user
   const card = await prisma.card.findFirst({
     where: { id, deck: { userId: user.id } },
     select: { id: true, deckId: true },

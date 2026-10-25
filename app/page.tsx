@@ -1,29 +1,31 @@
 import Link from "next/link";
+import { primaryButton, secondaryButton } from "@/lib/ui";
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-xl px-8 py-12">
-      <h1 className="font-display text-4xl font-bold leading-tight">
-        Review each card just before you forget it.
-      </h1>
-      <p className="mt-4 max-w-md text-lg text-muted">
-        Add your cards, study the ones that are due, and the app schedules the next review for you.
-      </p>
-
-      <div className="mt-8 flex gap-3">
-        <Link href="/signup" className="rounded-md bg-accent px-5 py-2.5 font-bold text-accent-ink">
-          Sign up
-        </Link>
-        <Link href="/login" className="rounded-md border border-ink px-5 py-2.5 font-bold">
-          Log in
-        </Link>
+    <main className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
+      <div>
+        <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">
+          Review each card just before you forget it.
+        </h1>
+        <p className="mt-4 max-w-md text-lg text-muted">
+          Add your cards, study the ones that are due, and the app schedules the next review for you.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/signup" className={primaryButton}>
+            Sign up
+          </Link>
+          <Link href="/login" className={secondaryButton}>
+            Log in
+          </Link>
+        </div>
       </div>
 
-      <div
-        aria-hidden
-        className="ruled mt-12 h-52 -rotate-2 rounded-md pl-[4.25rem] pr-8 pt-[4.8rem] shadow-lg"
-      >
-        <p className="font-display text-3xl font-bold leading-[2.4rem] text-paper-ink">to run</p>
+      <div aria-hidden className="relative mx-auto w-full max-w-md">
+        <div className="flashcard-face absolute inset-0 translate-x-3 translate-y-3 rotate-3 opacity-60" />
+        <div className="flashcard-face relative grid h-56 -rotate-2 place-items-center p-6">
+          <p className="font-display text-4xl font-bold">to run</p>
+        </div>
       </div>
     </main>
   );
