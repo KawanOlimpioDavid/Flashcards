@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/dal";
+import { primaryButton } from "@/lib/ui";
 import StudyCard from "./study-card";
 
 async function Study({ params }: { params: Promise<{ id: string }> }) {
@@ -27,17 +28,31 @@ async function Study({ params }: { params: Promise<{ id: string }> }) {
   ]);
 
   return (
-    <main className="mx-auto max-w-xl p-8">
-      <Link href={`/decks/${deck.id}`} className="text-sm underline">
-        ← Back to {deck.name}
+    <main className="mx-auto max-w-xl px-8 py-10">
+      <Link
+        href={`/decks/${deck.id}`}
+        className="text-sm text-muted underline underline-offset-4 hover:text-ink"
+      >
+        Back to {deck.name}
       </Link>
-      <h1 className="mb-1 mt-4 text-2xl font-bold">Study: {deck.name}</h1>
-      <p className="mb-6 text-sm text-gray-400">{dueCount} due</p>
+      <h1 className="mb-1 mt-4 font-display text-3xl font-bold">{deck.name}</h1>
+      <p className="mb-8 text-sm text-muted">
+        {dueCount} {dueCount === 1 ? "card" : "cards"} due
+      </p>
 
       {card ? (
         <StudyCard key={card.id} id={card.id} front={card.front} back={card.back} />
       ) : (
-        <p>Nothing to review right now. Come back later!</p>
+        <div>
+          <p className="font-display text-xl font-bold">You’re done for now.</p>
+          <p className="mt-2 text-muted">
+            Rated cards come back on their schedule. Cards you rated Hard return in 10 minutes. You
+            can add new cards at any time.
+          </p>
+          <Link href={`/decks/${deck.id}`} className={`${primaryButton} mt-6 inline-block`}>
+            Add or edit cards
+          </Link>
+        </div>
       )}
     </main>
   );

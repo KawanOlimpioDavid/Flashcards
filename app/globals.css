@@ -1,26 +1,87 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --desk: #e8edf3;
+  --ink: #16233a;
+  --muted: #5b6b82;
+  --line: #c5d0de;
+  --danger: #b3261e;
+  --accent: #ffd23f;
+  --accent-ink: #16233a;
+  --paper: #fcfcfa;
+  --paper-ink: #16233a;
+  --rule: #8db3e2;
+  --margin: #e4572e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --desk: #101a2b;
+    --ink: #e8edf3;
+    --muted: #9fb0c6;
+    --line: #27364f;
+    --danger: #ff8a7a;
   }
 }
 
+@theme inline {
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-danger: var(--danger);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-paper: var(--paper);
+  --color-paper-ink: var(--paper-ink);
+  --font-sans: var(--font-atkinson);
+  --font-display: var(--font-bricolage);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-atkinson), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Ruled index card: lines every 2.4rem, red margin line */
+.ruled {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, transparent 3.25rem, var(--margin) 3.25rem calc(3.25rem + 2px), transparent calc(3.25rem + 2px)),
+    repeating-linear-gradient(to bottom, transparent 0 2.4rem, var(--rule) 2.4rem calc(2.4rem + 1px));
+}
+
+/* Card flip */
+.flip {
+  perspective: 1200px;
+}
+.flip-inner {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+.flip[data-flipped="true"] .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transition: none;
+  }
 }
