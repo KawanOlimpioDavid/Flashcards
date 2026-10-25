@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { nextState, type Rating } from "@/lib/srs";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/dal";
+import { redirect } from "next/navigation";
 
 export async function createCard(formData: FormData) {
   const user = await requireUser();
@@ -59,4 +60,25 @@ export async function reviewCard(formData: FormData) {
   const { box, nextReview } = nextState(card.box, rating as Rating);
   await prisma.card.update({ where: { id: card.id }, data: { box, nextReview } });
   revalidatePath(`/decks/${card.deckId}/study`);
+}
+
+export async function updateCard(formData: FormData) {
+  const user = await requireUser();
+  const id = Number(formData.get("id"));
+  const front = String(formData.get("front") ?? "").trim();
+  const back = String(formData.get("back") ?? "").trim();
+
+  if (!Number.isInteger(id) || !front || !back) return;
+  if (front.length > 500 || back.length > 2000) return;
+
+  // Only cards from decks that belong to the logged-in user
+  const card = await prisma.card.findFirst({
+    where: { id, deck: { userId: user.id } },
+    select: { id: true, deckId: true },
+  });
+  if (!card) return;
+
+  await prisma.card.update({ where: { id: card.id }, data: { front, back } });
+  revalidatePath(`/decks/${card.deckId}`);
+  redirect(`/decks/${card.deckId}`);
 }

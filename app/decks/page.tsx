@@ -13,8 +13,9 @@ async function Decks() {
   const decks = await prisma.deck.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { cards: true } } },
+    include: { cards: { select: { nextReview: true } } },
   });
+  const now = new Date();
 
   return (
     <main className="mx-auto max-w-xl p-8">
@@ -40,23 +41,40 @@ async function Decks() {
         <p>No decks yet. Create your first one!</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {decks.map((deck) => (
-            <li
-              key={deck.id}
-              className="flex items-center justify-between rounded border border-gray-600 p-3"
-            >
-              <span>
-                <Link href={`/decks/${deck.id}`} className="underline">
-                  {deck.name}
-                </Link>{" "}
-                <span className="text-sm text-gray-400">({deck._count.cards} {deck._count.cards === 1 ? "card" : "cards"})</span>
-              </span>
-              <form action={deleteDeck}>
-                <input type="hidden" name="id" value={deck.id} />
-                <button className="text-sm text-red-500">Delete</button>
-              </form>
-            </li>
-          ))}
+          {decks.map((deck) => {
+            const total = deck.cards.length;
+            const due = deck.cards.filter((c) => c.nextReview <= now).length;
+
+            return (
+              <li
+                key={deck.id}
+                className="flex items-center justify-between rounded border border-gray-600 p-3"
+              >
+                <span>
+                  <Link href={`/decks/${deck.id}`} className="underline">
+                    {deck.name}
+                  </Link>{" "}
+                  <span className="text-sm text-gray-400">
+                    ({total} {total === 1 ? "card" : "cards"}, {due} due)
+                  </span>
+                </span>
+                <div className="flex items-center gap-3">
+                  {due > 0 && (
+                    <Link
+                      href={`/decks/${deck.id}/study`}
+                      className="rounded bg-green-600 px-3 py-1 text-sm text-white"
+                    >
+                      Study
+                    </Link>
+                  )}
+                  <form action={deleteDeck}>
+                    <input type="hidden" name="id" value={deck.id} />
+                    <button className="text-sm text-red-500">Delete</button>
+                  </form>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>

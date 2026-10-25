@@ -45,10 +45,15 @@ async function DeckContent({ params }: { params: Promise<{ id: string }> }) {
                 <p className="font-medium">{card.front}</p>
                 <p className="whitespace-pre-wrap text-sm text-gray-400">{card.back}</p>
               </div>
-              <form action={deleteCard}>
-                <input type="hidden" name="id" value={card.id} />
-                <button className="text-sm text-red-500">Delete</button>
-              </form>
+              <div className="flex items-center gap-3">
+                <Link href={`/decks/${deck.id}/cards/${card.id}`} className="text-sm underline">
+                  Edit
+                </Link>
+                <form action={deleteCard}>
+                  <input type="hidden" name="id" value={card.id} />
+                  <button className="text-sm text-red-500">Delete</button>
+                </form>
+              </div>
             </li>
           ))}
         </ul>
